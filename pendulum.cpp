@@ -12,17 +12,7 @@ class MyPendulum : public IPendulum {
 public:
     /// Constructor. Called when we make our MyPendulum instance in main().
     MyPendulum(double sample_freq_): sample_freq(sample_freq_) {      
-        float Kp = 8.92 // A/rad
-        float Kd = 0.693 // A/rad/s
-        float Ki = 
-        int T = 1000 // Hz
-        float A = Kp + 2*(Kd/T)+T*(Ki/2)
-        float B = T*Ki - 4*(Kd/T)
-        float C = 2*(Kd/T) + T*(Ki/2) - Kp
-        float last_error = 0.0
-        float last_last_error = 0.0
-        float last_control = 0.0
-        float last_last_control = 0.0
+        
 
         ///// IF YOU NEED TO DO ANY SETUP FOR VARIABLES, THAT GOES HERE /////
         // my_filter.setup(sample_freq, 10.0);
@@ -35,20 +25,39 @@ public:
     double control_midori(double t, double midori_volts) override {
         // This function should compute an amplifier command voltage given the
         // current controller time in seconds and Midori position in volts. 
-        while {
 
-        }
-        // See tips in the wiki for static variables
+        // Declare variables
+        const double Kp = 8.92; // A/rad
+        const double Kd = 0.693; // A*s/rad
+        const double T = 1/sample_freq; // s
+ 
+        const double A = Kp + 2*(Kd/T);
+        const double B = -2*(Kd/T) + Kp;
+        const double C = -1;
+
+        static double pos = 0; // rad
+        static double last_pos = 0;
+        static double control = 0; // A
+        static double last_control = 0;
+
+        static double command_voltage = 0;
         static double volts_last = 0.0;
 
-        // See tips in the wiki for plotting variables
-        double my_var = sin(2*PI*1.0*t);
-        plot("My Variable 2", my_var); 
+        const double RadtoV = 180/PI; // V/rad
+        const double VtoA = 0.6; // A/V
 
-        // See tips in the wiki for static variables
+        // Set pos and control variables
+        pos = midori_volts/RadtoV; // convert position in V --> rad
+        last_pos = volts_last/RadtoV; // convert position in V --> rad
+
+        // calculate control 
+        control = A*pos + B* last_pos + C*last_control; // control in A
+        command_voltage = control/VtoA; // convert control current into voltage
+
+        // Set last variables for next iteration
         volts_last = midori_volts;
+        last_control = control;
 
-        double command_voltage = 0;
         return command_voltage;
     }
 
