@@ -29,41 +29,44 @@ public:
         static Butterworth my_filter2(2, hertz(10), hertz(sample_freq));
 
         // Declare variables
-        const double Kp = 5.92; // A/rad
-        const double Kd = 0.493; // A*s/rad
-        const double T = 1/sample_freq; // s
+        // const double Kp = 5.92; // A/rad
+        // const double Kd = 0.493; // A*s/rad
+        const double Kp = 8.9;//A/rad
+        const double Kd = 0.69; // A*s/rad
+        const double T = 1.0/sample_freq; // s
  
-        const double A = Kp + 2*(Kd/T);
-        const double B = -2*(Kd/T) + Kp;
+        const double A = Kp + 2.0*(Kd/T);
+        const double B = -2.0*(Kd/T) + Kp;
         const double C = -1;
 
-        static double pos = 0; // rad
-        static double last_pos = 0;
-        static double control = 0; // A
-        static double last_control = 0;
+        static double pos = 0.0; // rad
+        static double last_pos = 0.0;
+        static double control = 0.0; // A
+        static double last_control = 0.0;
 
-        static double clean_volts = 0; // rad
-        static double clean_control = 0; // rad
+        static double clean_volts = 0.0; // rad
+        static double clean_control = 0.0; // rad
 
-        static double command_voltage = 0;
+        static double command_voltage = 0.0;
         static double volts_last = 0.0;
 
-        const double RadtoV = 180/PI; // V/rad
+        const double RadtoV = 180.0/PI; // V/rad
         const double VtoA = -0.6; // A/V
 
         // Set pos and control variables
         clean_volts = my_filter.update(midori_volts);
         pos = clean_volts/RadtoV; // convert position in V --> rad
-        //last_pos = volts_last/RadtoV; // convert position in V --> rad
+        last_pos = volts_last/RadtoV; // convert position in V --> rad
 
         // calculate control 
         control = A*pos + B* last_pos + C*last_control; // control in A
         command_voltage = control/VtoA; // convert control current into voltage
-        command_voltage = my_filter2.update(command_voltage);
+        //command_voltage = my_filter2.update(command_voltage);
 
         // Set last variables for next iteration
         // volts_last = midori_volts;
-        last_pos = pos; // convert position in V --> rad
+        volts_last = clean_volts;
+        //last_pos = pos; // convert position in V --> rad
         last_control = control;
 
         plot("Midori Volts Clean", clean_volts);
@@ -94,7 +97,7 @@ public:
         // See tips in the wiki for static variables
         counts_last = counts;
 
-        double command_voltage = 0;
+       double command_voltage = 0;
         return command_voltage;
     }
 
@@ -116,7 +119,7 @@ int main(int argc, char const *argv[]) {
 
     ////// ADJUST YOUR SAMPLE RATE HERE //////
     // Don't increase past 2 kHz here
-    Frequency sample_rate = hertz(1000);
+    Frequency sample_rate = hertz(1500);
     //////  DON'T TOUCH ANYTHING ELSE  ///////
 
     // create an instance of your pendulum
